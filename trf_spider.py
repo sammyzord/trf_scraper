@@ -40,10 +40,12 @@ class TRFSpider(Spider):
             yield Request(url, callback=self.parse_results)
 
     def parse_results(self, response):
-        # self.parse_processo(response)
+        self.parse_processo(response)
         self.parse_distribuicao(response)
+        self.parse_movimentacao(response)
 
     def parse_processo(self, response):
+        print("Processo\n")
         for item in response.css("div#aba-processo > table > tbody > tr"):
             title = item.css("th::text").get()
 
@@ -58,8 +60,9 @@ class TRFSpider(Spider):
             print(title, content)
 
     def parse_distribuicao(self, response):
+        print("\ndistribuicao\n")
         for table in response.css("div#aba-distribuicao > table"):
-            print("\n\nHeader")
+            print("Header")
             for header in table.css("thead > tr > th::text"):
                 print(header.get())
 
@@ -67,11 +70,24 @@ class TRFSpider(Spider):
             for item in table.css("tbody > tr > td::text"):
                 print(item.get())
 
-    def parse_partes(self, response):
-        pass
-
     def parse_movimentacao(self, response):
-        pass
+        print("\nmovimentacao\n")
+        for table in response.css("div#aba-movimentacao > table"):
+            print("Header")
+            for header in table.css("thead > tr > th::text"):
+                print(header.get())
+
+            print("\nContent")
+            for item in table.css("tbody > tr > td::text"):
+                print(item.get())
 
     def parse_peticoes(self, response):
-        pass
+        print("\npeticoes\n")
+        for table in response.css("div#aba-peticoes > table"):
+            print("Header")
+            for header in table.css("thead > tr > th::text"):
+                print(header.get())
+
+            print("\nContent")
+            for item in table.css("tbody > tr > td::text"):
+                print(item.get())
