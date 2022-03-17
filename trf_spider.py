@@ -40,7 +40,8 @@ class TRFSpider(Spider):
             yield Request(url, callback=self.parse_results)
 
     def parse_results(self, response):
-        self.parse_processo(response)
+        # self.parse_processo(response)
+        self.parse_distribuicao(response)
 
     def parse_processo(self, response):
         for item in response.css("div#aba-processo > table > tbody > tr"):
@@ -57,7 +58,14 @@ class TRFSpider(Spider):
             print(title, content)
 
     def parse_distribuicao(self, response):
-        pass
+        for table in response.css("div#aba-distribuicao > table"):
+            print("\n\nHeader")
+            for header in table.css("thead > tr > th::text"):
+                print(header.get())
+
+            print("\nContent")
+            for item in table.css("tbody > tr > td::text"):
+                print(item.get())
 
     def parse_partes(self, response):
         pass
