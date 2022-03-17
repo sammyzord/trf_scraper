@@ -43,6 +43,7 @@ class TRFSpider(Spider):
         self.parse_processo(response)
         self.parse_distribuicao(response)
         self.parse_movimentacao(response)
+        self.parse_peticoes(response)
 
     def parse_processo(self, response):
         print("Processo\n")
