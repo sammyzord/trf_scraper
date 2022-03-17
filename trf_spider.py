@@ -1,13 +1,11 @@
-from scrapy import Spider, FormRequest
-from scrapy.shell import inspect_response
+from scrapy import Spider, FormRequest, Request
+
+# from scrapy.shell import inspect_response
 
 
 class TRFSpider(Spider):
     custom_settings = {
-        "COOKIES_DEBUG": True,
         "ROBOTSTXT_ENABLED": False,
-        "HTTPERROR_ALLOW_ALL": True,
-        "RETRY_ENABLED": False,
     }
 
     name = "trf-spider"
@@ -27,12 +25,33 @@ class TRFSpider(Spider):
             "nmToken": "nomeParte",
         }
 
-        yield FormRequest(
-            url=self.trf_url,
-            formdata=data,
-            method="POST",
-            callback=self.parse_results,
+        yield FormRequest.from_response(
+            response, formnumber=1, formdata=data, callback=self.parse_list
         )
 
+    def parse_list(self, response):
+        for href in response.css("td > a.listar-processo::attr(href)"):
+            url = response.urljoin(href.get())
+            yield Request(url, callback=self.parse_inside_list)
+
+    def parse_inside_list(self, response):
+        for href in response.css("td > a::attr(href)"):
+            url = response.urljoin(href.get())
+            yield Request(url, callback=self.parse_results)
+
     def parse_results(self, response):
-        inspect_response(response, self)
+        self.parse_processo(response)
+
+    def parse_processo(self, response):
+        for item in response.css("div#aba-processo > table > tbody > tr"):
+            title = item.css("th::text").get()
+
+            if title is not None:
+                title = title.strip()
+
+            content = item.css("td::text").get()
+
+            if content is not None:
+                content = content.strip()
+
+            print(title, content)
