@@ -55,3 +55,15 @@ class TRFSpider(Spider):
                 content = content.strip()
 
             print(title, content)
+
+    def parse_distribuicao(self, response):
+        pass
+
+    def parse_partes(self, response):
+        pass
+
+    def parse_movimentacao(self, response):
+        pass
+
+    def parse_peticoes(self, response):
+        pass
