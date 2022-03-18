@@ -18,6 +18,7 @@ class TRFSpider(Spider):
 
     def parse(self, response):
 
+        # Only change name
         data = {
             "nome": "Pedro Paulo Silva",
             "secao": "TRF1",
