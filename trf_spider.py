@@ -1,3 +1,5 @@
+import re
+import csv
 from scrapy import Spider, FormRequest, Request
 
 # from scrapy.shell import inspect_response
@@ -40,13 +42,21 @@ class TRFSpider(Spider):
             yield Request(url, callback=self.parse_results)
 
     def parse_results(self, response):
-        self.parse_processo(response)
-        self.parse_distribuicao(response)
-        self.parse_movimentacao(response)
-        self.parse_peticoes(response)
+        proc_number = response.css(
+            "div#aba-processo > table > tbody > tr > td::text"
+        ).get()
 
-    def parse_processo(self, response):
-        print("Processo\n")
+        proc_number = re.sub("[^0-9]", "", proc_number)
+
+        self.parse_processo(response, proc_number)
+        self.parse_distribuicao(response, proc_number)
+        self.parse_movimentacao(response, proc_number)
+        self.parse_peticao(response, proc_number)
+
+    def parse_processo(self, response, proc_number):
+        file = open(f"output/processo/processo_{proc_number}.csv", "w")
+        writer = csv.writer(file)
+
         for item in response.css("div#aba-processo > table > tbody > tr"):
             title = item.css("th::text").get()
 
@@ -58,37 +68,90 @@ class TRFSpider(Spider):
             if content is not None:
                 content = content.strip()
 
-            print(title, content)
+            writer.writerow([title, content])
 
-    def parse_distribuicao(self, response):
-        print("\ndistribuicao\n")
+        file.close()
+
+    def parse_distribuicao(self, response, proc_number):
+        file = open(f"output/distribuicao/distribuicao_{proc_number}.csv", "w")
+        writer = csv.writer(file)
+
         for table in response.css("div#aba-distribuicao > table"):
-            print("Header")
+            headers = []
             for header in table.css("thead > tr > th::text"):
-                print(header.get())
+                headers.append(header.get())
 
-            print("\nContent")
-            for item in table.css("tbody > tr > td::text"):
-                print(item.get())
+            writer.writerow(headers)
 
-    def parse_movimentacao(self, response):
-        print("\nmovimentacao\n")
+            content = []
+            for item in table.css("tbody > tr > td"):
+                x = item.css("::text").get()
+                if x:
+                    content.append(x)
+                else:
+                    content.append("Não encontrado")
+
+            rows = [
+                content[x : x + len(headers)]
+                for x in range(0, len(content), len(headers))
+            ]
+
+            writer.writerows(rows)
+
+        file.close()
+
+    def parse_movimentacao(self, response, proc_number):
+        file = open(f"output/movimentacao/movimentacao_{proc_number}.csv", "w")
+        writer = csv.writer(file)
+
         for table in response.css("div#aba-movimentacao > table"):
-            print("Header")
+            headers = []
             for header in table.css("thead > tr > th::text"):
-                print(header.get())
+                headers.append(header.get())
 
-            print("\nContent")
-            for item in table.css("tbody > tr > td::text"):
-                print(item.get())
+            writer.writerow(headers)
 
-    def parse_peticoes(self, response):
-        print("\npeticoes\n")
+            content = []
+            for item in table.css("tbody > tr > td"):
+                x = item.css("::text").get()
+                if x:
+                    content.append(x)
+                else:
+                    content.append("Não encontrado")
+
+            rows = [
+                content[x : x + len(headers)]
+                for x in range(0, len(content), len(headers))
+            ]
+
+            writer.writerows(rows)
+
+        file.close()
+
+    def parse_peticao(self, response, proc_number):
+        file = open(f"output/peticao/peticao_{proc_number}.csv", "w")
+        writer = csv.writer(file)
+
         for table in response.css("div#aba-peticoes > table"):
-            print("Header")
+            headers = []
             for header in table.css("thead > tr > th::text"):
-                print(header.get())
+                headers.append(header.get())
 
-            print("\nContent")
-            for item in table.css("tbody > tr > td::text"):
-                print(item.get())
+            writer.writerow(headers)
+
+            content = []
+            for item in table.css("tbody > tr > td"):
+                x = item.css("::text").get()
+                if x:
+                    content.append(x)
+                else:
+                    content.append("Não encontrado")
+
+            rows = [
+                content[x : x + len(headers)]
+                for x in range(0, len(content), len(headers))
+            ]
+
+            writer.writerows(rows)
+
+        file.close()
